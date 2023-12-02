@@ -1,3 +1,4 @@
+import numpy as np
 import re
 
 MAX_CUBES = {
@@ -26,7 +27,6 @@ def check_valid_game(cube_count):
     return is_valid_game
 
 
-
 def get_valid_games(lines: list[str]) -> list[int]:
     valid_games = []
     for line in lines:
@@ -45,6 +45,24 @@ def get_valid_games(lines: list[str]) -> list[int]:
     return set(valid_games)
 
 
+def get_min_cubes(lines: list[str]) -> dict:
+    all_cube_set_powers = []
+    for line in lines:
+        line_index = re.search("\d+", line).group(0)
+
+        line_min_cubes = []
+        for color in MAX_CUBES.keys():
+            pattern = f"(\d+) ({color})"
+            matches = re.findall(pattern, line)
+            min_color_cubes = max([int(n[0]) for n in matches])
+            line_min_cubes.append(min_color_cubes)
+        
+        cube_set_power = np.prod(line_min_cubes)
+        all_cube_set_powers.append(cube_set_power)
+        
+    return sum(all_cube_set_powers)
+
+
 def main():
 
     response = []
@@ -57,8 +75,11 @@ def main():
         sum_valid_games = sum(valid_games)
         print(f"Valid game indices in {input_type} data sum to {sum_valid_games}")
 
-        response.append(sum_valid_games) 
-    
+        sum_cube_set_powers = get_min_cubes(lines)
+        print(f"The cube set powers for {input_type} data sum to {sum_cube_set_powers}")
+
+        response.append(sum_cube_set_powers)
+
     return response
 
 
