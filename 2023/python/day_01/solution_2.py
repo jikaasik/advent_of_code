@@ -50,6 +50,8 @@ def get_digits_and_combine(line: list[str]) -> int:
     last_digit = sorted(all_matches)[-1][1]
     combined_number = int("".join([first_digit, last_digit]))
 
+    import pdb; pdb.set_trace()
+
     return combined_number
 
 
