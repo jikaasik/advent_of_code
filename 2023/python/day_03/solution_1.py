@@ -1,3 +1,4 @@
+import numpy as np
 import re
 
 
@@ -15,10 +16,16 @@ def get_schematic_dimensions(data: str) -> list[int]:
     return (height, width)
 
 
-def get_number_locations(data: str) -> list[list]:
+def get_target_locations(data: str, type: str) -> list[list]:
     lines = data.split("\n")
-    number_locations = []
-    pattern = r"(\d+)"
+    target_locations = []
+    if type == "part":
+        pattern = r"(\d+)"
+    elif type == "gear":
+        pattern = r"(\*)"
+    else:
+        raise Exception("No valid type provided.")
+
     for i in range(len(lines)):
         matches = re.finditer(pattern, lines[i])
 
@@ -26,9 +33,9 @@ def get_number_locations(data: str) -> list[list]:
             number = m.group()
             start = m.start()
             end = m.end() - 1
-            number_locations.append((i, number, start, end))
+            target_locations.append((i, number, start, end))
     
-    return number_locations
+    return target_locations
 
 
 def get_adjacent_sections(number: tuple, lines: list[str], dimensions: tuple) -> list:
@@ -46,25 +53,21 @@ def get_adjacent_sections(number: tuple, lines: list[str], dimensions: tuple) ->
     return adjacent_sections
     
 
-def get_adjacent_symbols(sections: list[list], lines: list[str]) -> bool:
+def get_adjacent_target(sections: list[list], lines: list[str]) -> bool:
     relevant_lines = [n[0] for n in sections]
 
+    line_index = 0
     for i in relevant_lines:
-        line_index = 0
-        try:
-            line = lines[i]
-            begin = sections[line_index][-2]
-            end = sections[line_index][-1]
-            substring = line[begin:end+1]
-            pattern = r"[\!\@\#\$\%\^\&\*\(\)\-\=\\\`\_\+\|\~\{\}\;\'\:\"\<\>\/\[\]]"
-            matches = [re.search(pattern, substring)]
-            match = next((value for value in matches if value is not None), None)
-            line_index += 1
-
-            if match:
-                return True
-        except:
-            import pdb; pdb.set_trace()
+        line = lines[i]
+        begin = sections[line_index][-2]
+        end = sections[line_index][-1]
+        substring = line[begin:end+1]
+        pattern = r"[\!\@\#\$\%\^\&\*\(\)\-\=\\\`\_\+\|\~\{\}\;\'\:\"\<\>\/\[\]]"
+        matches = [re.search(pattern, substring)]
+        match = next((value for value in matches if value is not None), None)
+        line_index += 1
+        if match:
+            return True
 
     return False
 
@@ -76,13 +79,34 @@ def identify_parts(numbers: list[tuple], lines: list[str], data: str, dimensions
         if len(potential_parts):
             for number in potential_parts:
                 adjacent_sections = get_adjacent_sections(number, lines, dimensions)
-                adjacent_symbol = get_adjacent_symbols(adjacent_sections, lines)
+                adjacent_symbol = get_adjacent_target(adjacent_sections, lines)
 
                 if adjacent_symbol:
                     valid_parts.append(int(number[1]))
 
 
     return valid_parts
+
+
+def identify_gears(gears: list[tuple], numbers: list[tuple], lines: list[str], dimensions: tuple) -> list:
+    valid_gears = []
+    for i in range(len(lines)):
+        potential_gears = [n for n in gears if n[0] == i]
+        if len(potential_gears):
+            for gear in potential_gears:
+                adjacent_numbers = []
+                adjacent_sections = get_adjacent_sections(gear, lines, dimensions)
+                for number in numbers:
+                    relevant_sections = [n for n in adjacent_sections if n[0] == number[0]]
+                    for section in relevant_sections:
+                        overlap = set(range(section[1], section[2]+1)).intersection(set(range(number[2], number[3]+1)))
+                        if len(overlap):
+                            adjacent_numbers.append(int(number[1]))
+                if len(adjacent_numbers) == 2:
+                    valid_gears.append(np.product(adjacent_numbers))
+    
+    return valid_gears
+
 
 
 def main():
@@ -94,11 +118,14 @@ def main():
         lines = data.split("\n")
         dimensions = get_schematic_dimensions(data)
 
-        numbers = get_number_locations(data)
+        numbers = get_target_locations(data, "part")
         valid_parts = identify_parts(numbers, lines, data, dimensions)
-        response.append(sum(valid_parts))
-    
-    import pdb; pdb.set_trace()
+        # valid_gears = identify_parts(gears, lines, data, dimensions, "number")
+        gears = get_target_locations(data, "gear")
+        gear_ratios = identify_gears(gears, numbers, lines, dimensions)
+        response.append([sum(valid_parts), sum(gear_ratios)])
+        print(f"The valid parts for the {input_type} data sum to: {sum(valid_parts)}")
+        print(f"The gear ratios for the {input_type} data sum to: {sum(gear_ratios)}")
 
     return response
 

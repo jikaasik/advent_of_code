@@ -6,9 +6,7 @@ from solution_1 import main as part_one
 def test_part_one():
     response = part_one()
     assert len(response) == 2
-    assert response[0] == 4361
-    pass
-
-
-# def test_part_two():
-#     pass
+    assert response[0][0] == 4361
+    assert response[0][1] == 467835
+    assert response[1][0] == 517021
+    assert response[1][1] == 81296995
