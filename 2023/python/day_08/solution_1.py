@@ -17,10 +17,7 @@ def find_end(key: list[int], paths: list[str], starting_point: str) -> int:
     iter_key = (i for i in key * len(paths))
     while location != "ZZZ":
         direction = next(iter_key)
-        # print(f"Starting location: {location}")
-        # print(f"Direction: {direction}")
         location = paths[location][direction]
-        # print(f"Destination: {location}")
         steps_to_end += 1
 
     return steps_to_end
