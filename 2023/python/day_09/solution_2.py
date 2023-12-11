@@ -8,7 +8,7 @@ def get_prediction(history: list[int]) -> list[int]:
         if i > 0:
             differences.append(history[i] - history[i-1])
 
-    return history[-1] + get_prediction(differences)
+    return history[0] - get_prediction(differences)
 
 
 def main():
