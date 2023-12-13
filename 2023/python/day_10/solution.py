@@ -52,6 +52,8 @@ def evaluate_direction(current: str, neighbor: str, direction: str) -> bool:
         case "F" if (direction in ["up", "left"] and
                      direction in DIRECTIONS_ALLOWED.get(current, [])):
             return True
+        case "S" if direction in DIRECTIONS_ALLOWED.get(current, []):
+            return True
         case _:
             return False
 
@@ -65,17 +67,17 @@ def traverse_map(grid: str) -> int:
     steps = 0
 
     while not finished:
-        # for direction in ["up", "down", "left", "right"]:
-        for direction in ["right", "left", "down", "up"]:
+        for direction in ["up", "down", "left", "right"]:
+        # for direction in ["right", "left", "down", "up"]:
             if direction != uturn:
                 neighbor, new_uturn, new_location = get_neighbor(grid, location, direction)
-                if neighbor == "S":
+                evaluation = evaluate_direction(current, neighbor, direction)
+                if evaluation and neighbor == "S":
                     steps += 1
                     print(f"Moving: {direction} to {neighbor} at step {steps}")
                     finished = True
                     break
-                evaluation = evaluate_direction(current, neighbor, direction)
-                if evaluation:
+                elif evaluation:
                     location = new_location
                     current = str(grid[location[0], location[1]])
                     uturn = new_uturn
