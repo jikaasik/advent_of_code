@@ -22,6 +22,6 @@ This repository contains my 2023 Advent of Code solutions, written in Python.
 #### Day 9: Mirage Maintenance
 - [Part 1](solutions/day_09/solution_1.py), [Part 2](solutions/day_09/solution_2.py)
 #### Day 10: Pipe Maze
-- [Parts 1 & 2](solutions/day_10/solution_1.py)
+- [Part 1](solutions/day_10/solution.py)
 #### Day 11: Cosmic Expansion
-- [Part 1](solutions/day_11/solution_1.py)
+- [Part 1](solutions/day_11/solution.py)
